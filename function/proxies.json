@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json.schemastore.org/proxies",
+    "proxies": {
+        "ProxyRoot": {
+            "matchCondition": {
+                "route": "/",
+                "methods": [
+                    "GET"
+                ]
+            },
+            "backendUri": "https://{project}.blob.core.windows.net/{project-environment-branch}/index.html"
+        },
+        "ProxyPath": {
+            "matchCondition": {
+                "route": "/{*restOfPath}",
+                "methods": [
+                    "GET"
+                ]
+            },
+            "backendUri": "https://{project}.blob.core.windows.net/{project-environment-branch}/{restOfPath}"
+        }
+    }
+}
