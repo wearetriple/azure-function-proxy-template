@@ -1,0 +1,343 @@
+{
+    "tasks": [
+        {
+            "displayName": "Azure Deployment:Create Or Update Resource Group action on $(ResourceGroupName)",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": true,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "ConnectedServiceName": "1a65159a-e19b-441f-b1dc-f07e401a5682",
+                "action": "Create Or Update Resource Group",
+                "resourceGroupName": "$(ResourceGroupName)",
+                "location": "West Europe",
+                "templateLocation": "URL of the file",
+                "csmFileLink": "https://raw.githubusercontent.com/wearetriple/azure-function-proxy-template/master/deployment/arm.json",
+                "csmParametersFileLink": "",
+                "csmFile": "$(System.DefaultWorkingDirectory)/_CI/deployment/arm.json",
+                "csmParametersFile": "",
+                "overrideParameters": "-functionName $(InstanceName) -projectName $(ProjectName)",
+                "deploymentMode": "Incremental",
+                "enableDeploymentPrerequisites": "None",
+                "deploymentGroupEndpoint": "",
+                "project": "",
+                "deploymentGroupName": "",
+                "copyAzureVMTags": "true",
+                "outputVariable": "",
+                "deploymentOutputs": ""
+            },
+            "task": {
+                "id": "94a74903-f93f-4075-884f-dc11f34058b4",
+                "versionSpec": "2.*",
+                "definitionType": "task"
+            }
+        },
+        {
+            "displayName": "ARM Outputs",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": true,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "ConnectedServiceNameSelector": "ConnectedServiceNameARM",
+                "ConnectedServiceNameARM": "1a65159a-e19b-441f-b1dc-f07e401a5682",
+                "resourceGroupName": "SPATest",
+                "prefix": "",
+                "outputNames": "",
+                "whenLastDeploymentIsFailed": "fail",
+                "deploymentNameFilter": ""
+            },
+            "task": {
+                "id": "584bcff2-3353-4f11-872b-6ba01267a972",
+                "versionSpec": "3.*",
+                "definitionType": "task"
+            }
+        },
+        {
+            "displayName": "Create SAS Token for Storage Account $(__azureStorageName)",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": true,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "ConnectedServiceName": "1a65159a-e19b-441f-b1dc-f07e401a5682",
+                "StorageAccountRM": "$(__azureStorageName)",
+                "SasTokenTimeOutInHours": "720",
+                "Permission": "r",
+                "StorageContainerName": "$(__azureProxyFunctionName)",
+                "outputStorageUri": "StorageUri",
+                "outputStorageContainerSasToken": "__azureSASToken"
+            },
+            "task": {
+                "id": "9e0b2bda-6a8d-4215-8e8c-3d47614db813",
+                "versionSpec": "1.*",
+                "definitionType": "task"
+            }
+        },
+        {
+            "displayName": "AzureBlob File Copy",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": true,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "SourcePath": "$(System.DefaultWorkingDirectory)/_CI/spa",
+                "ConnectedServiceNameSelector": "ConnectedServiceNameARM",
+                "ConnectedServiceName": "",
+                "ConnectedServiceNameARM": "1a65159a-e19b-441f-b1dc-f07e401a5682",
+                "Destination": "AzureBlob",
+                "StorageAccount": "",
+                "StorageAccountRM": "$(__azureStorageName)",
+                "ContainerName": "$(__azureProxyFunctionName)",
+                "BlobPrefix": "",
+                "EnvironmentName": "",
+                "EnvironmentNameRM": "",
+                "ResourceFilteringMethod": "machineNames",
+                "MachineNames": "",
+                "vmsAdminUserName": "",
+                "vmsAdminPassword": "",
+                "TargetPath": "",
+                "AdditionalArguments": "/SetContentType",
+                "enableCopyPrerequisites": "false",
+                "CopyFilesInParallel": "true",
+                "CleanTargetBeforeCopy": "false",
+                "skipCACheck": "true",
+                "outputStorageUri": "",
+                "outputStorageContainerSasToken": ""
+            },
+            "task": {
+                "id": "eb72cb01-a7e5-427b-a8a1-1b31ccac8a43",
+                "versionSpec": "1.*",
+                "definitionType": "task"
+            }
+        },
+        {
+            "displayName": "Download proxies.json",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": true,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "FileUrl": "https://raw.githubusercontent.com/wearetriple/azure-function-proxy-template/master/function/proxies.json",
+                "DestinationFolder": "$(System.DefaultWorkingDirectory)/function",
+                "requireAuthentication": "false",
+                "Username": "",
+                "Password": ""
+            },
+            "task": {
+                "id": "ee8df0d0-dcc0-11e6-bf0f-4bcbb4b0e495",
+                "versionSpec": "1.*",
+                "definitionType": "task"
+            }
+        },
+        {
+            "displayName": "Set variable: proxies.ProxyPath.backendUri to: 'https://$(__azureStorageName).blob.core.windows.net/$(__azureProxyFunctionName)/{restOfPath}$(__azureSASToken)'",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": true,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "VariableName": "proxies.ProxyPath.backendUri",
+                "Value": "https://$(__azureStorageName).blob.core.windows.net/$(__azureProxyFunctionName)/{restOfPath}$(__azureSASToken)"
+            },
+            "task": {
+                "id": "3ca44a28-62de-4c60-8d77-a99065b95a8a",
+                "versionSpec": "1.*",
+                "definitionType": "task"
+            }
+        },
+        {
+            "displayName": "Set variable: proxies.ProxyRoot.backendUri to: 'https://$(__azureStorageName).blob.core.windows.net/$(__azureProxyFunctionName)/index.html$(__azureSASToken)'",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": true,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "VariableName": "proxies.ProxyRoot.backendUri",
+                "Value": "https://$(__azureStorageName).blob.core.windows.net/$(__azureProxyFunctionName)/index.html$(__azureSASToken)"
+            },
+            "task": {
+                "id": "3ca44a28-62de-4c60-8d77-a99065b95a8a",
+                "versionSpec": "1.*",
+                "definitionType": "task"
+            }
+        },
+        {
+            "displayName": "Azure App Service Deploy: $(__azureProxyFunctionName)",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": true,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "ConnectedServiceName": "1a65159a-e19b-441f-b1dc-f07e401a5682",
+                "WebAppKind": "functionapp",
+                "WebAppName": "$(__azureProxyFunctionName)",
+                "DeployToSlotFlag": "false",
+                "ResourceGroupName": "SPATest",
+                "SlotName": "",
+                "ImageSource": "Registry",
+                "AzureContainerRegistry": "",
+                "AzureContainerRegistryLoginServer": "",
+                "AzureContainerRegistryImage": "",
+                "AzureContainerRegistryTag": "",
+                "DockerRepositoryAccess": "public",
+                "RegistryConnectedServiceName": "",
+                "PrivateRegistryImage": "",
+                "PrivateRegistryTag": "",
+                "DockerNamespace": "",
+                "DockerRepository": "",
+                "DockerImageTag": "",
+                "VirtualApplication": "",
+                "Package": "$(System.DefaultWorkingDirectory)/function",
+                "BuiltinLinuxPackage": "$(System.DefaultWorkingDirectory)/**/*.zip",
+                "RuntimeStack": "",
+                "StartupCommand": "",
+                "WebAppUri": "",
+                "ScriptType": "",
+                "InlineScript": ":: You can provide your deployment commands here. One command per line.",
+                "ScriptPath": "",
+                "GenerateWebConfig": "false",
+                "WebConfigParameters": "",
+                "AppSettings": "",
+                "ConfigurationSettings": "",
+                "TakeAppOfflineFlag": "false",
+                "UseWebDeploy": "true",
+                "SetParametersFile": "",
+                "RemoveAdditionalFilesFlag": "false",
+                "ExcludeFilesFromAppDataFlag": "false",
+                "AdditionalArguments": "",
+                "RenameFilesFlag": "false",
+                "XmlTransformation": "false",
+                "XmlVariableSubstitution": "false",
+                "JSONFiles": "proxies.json"
+            },
+            "task": {
+                "id": "497d490f-eea7-4f2b-ab94-48d9c1acdcb1",
+                "versionSpec": "3.*",
+                "definitionType": "task"
+            }
+        }
+    ],
+    "runsOn": [
+        "Agent"
+    ],
+    "revision": 8,
+    "createdBy": {
+        "displayName": "Thomas Bleijendaal",
+        "id": "6dfd1ac2-dbeb-69b0-a0ff-d3bb8cfbb206",
+        "uniqueName": "t.bleijendaal@wearetriple.com"
+    },
+    "createdOn": "2018-06-06T08:58:20.617Z",
+    "modifiedBy": {
+        "displayName": "Thomas Bleijendaal",
+        "id": "6dfd1ac2-dbeb-69b0-a0ff-d3bb8cfbb206",
+        "uniqueName": "t.bleijendaal@wearetriple.com"
+    },
+    "modifiedOn": "2018-06-06T11:18:46.337Z",
+    "comment": "",
+    "id": "9a95c3ee-fc60-46f2-82a5-d32ca37b7b34",
+    "name": "Azure Proxy Function Deploy",
+    "version": {
+        "major": 1,
+        "minor": 0,
+        "patch": 0,
+        "isTest": false
+    },
+    "iconUrl": "https://cdn.vsassets.io/v/20180604T193724/_content/icon-meta-task.png",
+    "friendlyName": "Azure Proxy Function Deploy",
+    "description": "Deploy static site content as a pay-as-you-go model on Azure",
+    "category": "Deploy",
+    "definitionType": "metaTask",
+    "author": "Thomas Bleijendaal",
+    "demands": [],
+    "groups": [],
+    "inputs": [
+        {
+            "aliases": [],
+            "options": {},
+            "properties": {},
+            "name": "__azureProxyFunctionName",
+            "label": "__azureProxyFunctionName",
+            "defaultValue": "$(__azureProxyFunctionName)",
+            "required": true,
+            "type": "string",
+            "helpMarkDown": "private",
+            "groupName": ""
+        },
+        {
+            "aliases": [],
+            "options": {},
+            "properties": {},
+            "name": "__azureSASToken",
+            "label": "__azureSASToken",
+            "defaultValue": "$(__azureSASToken)",
+            "required": true,
+            "type": "string",
+            "helpMarkDown": "private",
+            "groupName": ""
+        },
+        {
+            "aliases": [],
+            "options": {},
+            "properties": {},
+            "name": "__azureStorageName",
+            "label": "__azureStorageName",
+            "defaultValue": "$(__azureStorageName)",
+            "required": true,
+            "type": "string",
+            "helpMarkDown": "private",
+            "groupName": ""
+        },
+        {
+            "aliases": [],
+            "options": {},
+            "properties": {},
+            "name": "InstanceName",
+            "label": "InstanceName",
+            "defaultValue": "$(Release.EnvironmentName)$(Build.SourceBranchName)",
+            "required": true,
+            "type": "string",
+            "helpMarkDown": "Instance name of the static site to be created.",
+            "groupName": ""
+        },
+        {
+            "aliases": [],
+            "options": {},
+            "properties": {},
+            "name": "ProjectName",
+            "label": "ProjectName",
+            "defaultValue": "TripleSpaTest12345",
+            "required": true,
+            "type": "string",
+            "helpMarkDown": "Name of the project which uses this Task Group.",
+            "groupName": ""
+        },
+        {
+            "aliases": [],
+            "options": {},
+            "properties": {
+                "EditableOptions": "True"
+            },
+            "name": "ResourceGroupName",
+            "label": "ResourceGroupName",
+            "defaultValue": "SPATest",
+            "required": true,
+            "type": "pickList",
+            "helpMarkDown": "Provide the name of a resource group.",
+            "groupName": ""
+        }
+    ],
+    "satisfies": [],
+    "sourceDefinitions": [],
+    "dataSourceBindings": [],
+    "instanceNameFormat": "Task group: Azure Proxy Function Deploy $(__azureProxyFunctionName)",
+    "execution": {}
+}
