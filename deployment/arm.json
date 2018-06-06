@@ -74,11 +74,11 @@
     }
   ],
   "outputs": {
-    "FunctionName": {
+    "__azureProxyFunctionName": {
       "type": "string",
       "value": "[variables('functionsName')]"
     },
-    "StorageName": {
+    "__azureStorageName": {
       "type": "string",
       "value": "[variables('storageAccountName')]"
     }
