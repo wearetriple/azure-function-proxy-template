@@ -56,6 +56,27 @@
             }
         },
         {
+            "displayName": "PowerShell Script",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": false,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "scriptType": "inlineScript",
+                "scriptName": "",
+                "arguments": "",
+                "workingFolder": "",
+                "inlineScript": "\"$(__azureProxyFunctionName)\"\n\"$(__azureStorageName)\"\n\nWrite-Host \"$(__azureProxyFunctionName)\"\nWrite-Host \"$(__azureStorageName)\"\n",
+                "failOnStandardError": "true"
+            },
+            "task": {
+                "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                "versionSpec": "1.*",
+                "definitionType": "task"
+            }
+        },
+        {
             "displayName": "Create SAS Token for Storage Account $(__azureStorageName)",
             "alwaysRun": false,
             "continueOnError": false,
@@ -68,11 +89,32 @@
                 "SasTokenTimeOutInHours": "720",
                 "Permission": "r",
                 "StorageContainerName": "$(__azureProxyFunctionName)",
-                "outputStorageUri": "StorageUri",
+                "outputStorageUri": "__azureStorageUri",
                 "outputStorageContainerSasToken": "__azureSASToken"
             },
             "task": {
                 "id": "9e0b2bda-6a8d-4215-8e8c-3d47614db813",
+                "versionSpec": "1.*",
+                "definitionType": "task"
+            }
+        },
+        {
+            "displayName": "PowerShell Script copy",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": false,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "scriptType": "inlineScript",
+                "scriptName": "",
+                "arguments": "",
+                "workingFolder": "",
+                "inlineScript": "\"$(__azureSASToken)\"\n\"$(__azureStorageUri)\"\n\nWrite-Host \"$(__azureSASToken)\"\nWrite-Host \"$(__azureStorageUri)\"\n",
+                "failOnStandardError": "true"
+            },
+            "task": {
+                "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
                 "versionSpec": "1.*",
                 "definitionType": "task"
             }
@@ -85,7 +127,7 @@
             "enabled": true,
             "timeoutInMinutes": 0,
             "inputs": {
-                "SourcePath": "$(System.DefaultWorkingDirectory)/_CI/spa",
+                "SourcePath": "$(Source)",
                 "ConnectedServiceNameSelector": "ConnectedServiceNameARM",
                 "ConnectedServiceName": "",
                 "ConnectedServiceNameARM": "1a65159a-e19b-441f-b1dc-f07e401a5682",
@@ -170,6 +212,27 @@
             }
         },
         {
+            "displayName": "PowerShell Script copy copy",
+            "alwaysRun": false,
+            "continueOnError": false,
+            "condition": "succeeded()",
+            "enabled": false,
+            "timeoutInMinutes": 0,
+            "inputs": {
+                "scriptType": "inlineScript",
+                "scriptName": "",
+                "arguments": "",
+                "workingFolder": "",
+                "inlineScript": "\"$(proxies.ProxyPath.backendUri)\"\n\"$(proxies.ProxyRoot.backendUri)\"\n\nWrite-Host \"$(proxies.ProxyPath.backendUri)\"\nWrite-Host \"$(proxies.ProxyRoot.backendUri)\"\n",
+                "failOnStandardError": "true"
+            },
+            "task": {
+                "id": "e213ff0f-5d5c-4791-802d-52ea3e7be1f1",
+                "versionSpec": "1.*",
+                "definitionType": "task"
+            }
+        },
+        {
             "displayName": "Azure App Service Deploy: $(__azureProxyFunctionName)",
             "alwaysRun": false,
             "continueOnError": false,
@@ -229,7 +292,7 @@
     "runsOn": [
         "Agent"
     ],
-    "revision": 8,
+    "revision": 16,
     "createdBy": {
         "displayName": "Thomas Bleijendaal",
         "id": "6dfd1ac2-dbeb-69b0-a0ff-d3bb8cfbb206",
@@ -241,7 +304,7 @@
         "id": "6dfd1ac2-dbeb-69b0-a0ff-d3bb8cfbb206",
         "uniqueName": "t.bleijendaal@wearetriple.com"
     },
-    "modifiedOn": "2018-06-06T11:18:46.337Z",
+    "modifiedOn": "2018-06-08T13:46:02.730Z",
     "comment": "",
     "id": "9a95c3ee-fc60-46f2-82a5-d32ca37b7b34",
     "name": "Azure Proxy Function Deploy",
@@ -300,6 +363,18 @@
             "aliases": [],
             "options": {},
             "properties": {},
+            "name": "__azureStorageUri",
+            "label": "__azureStorageUri",
+            "defaultValue": "$(__azureStorageUri)",
+            "required": true,
+            "type": "string",
+            "helpMarkDown": "",
+            "groupName": ""
+        },
+        {
+            "aliases": [],
+            "options": {},
+            "properties": {},
             "name": "InstanceName",
             "label": "InstanceName",
             "defaultValue": "$(Release.EnvironmentName)$(Build.SourceBranchName)",
@@ -323,6 +398,30 @@
         {
             "aliases": [],
             "options": {},
+            "properties": {},
+            "name": "proxies.ProxyPath.backendUri",
+            "label": "proxies.ProxyPath.backendUri",
+            "defaultValue": "$(proxies.ProxyPath.backendUri)",
+            "required": true,
+            "type": "string",
+            "helpMarkDown": "",
+            "groupName": ""
+        },
+        {
+            "aliases": [],
+            "options": {},
+            "properties": {},
+            "name": "proxies.ProxyRoot.backendUri",
+            "label": "proxies.ProxyRoot.backendUri",
+            "defaultValue": "$(proxies.ProxyPath.backendUri)",
+            "required": true,
+            "type": "string",
+            "helpMarkDown": "",
+            "groupName": ""
+        },
+        {
+            "aliases": [],
+            "options": {},
             "properties": {
                 "EditableOptions": "True"
             },
@@ -332,6 +431,18 @@
             "required": true,
             "type": "pickList",
             "helpMarkDown": "Provide the name of a resource group.",
+            "groupName": ""
+        },
+        {
+            "aliases": [],
+            "options": {},
+            "properties": {},
+            "name": "Source",
+            "label": "Source",
+            "defaultValue": "$(System.DefaultWorkingDirectory)/_CI/spa",
+            "required": true,
+            "type": "filePath",
+            "helpMarkDown": "Absolute path of the source folder, or file on the local machine, or a UNC share. Expression should return a single folder or a file.",
             "groupName": ""
         }
     ],

@@ -1,7 +1,7 @@
 {
     "tasks": [
         {
-            "displayName": "Azure PowerShell script: InlineScript",
+            "displayName": "Azure PowerShell",
             "alwaysRun": false,
             "continueOnError": false,
             "condition": "succeeded()",
@@ -29,7 +29,7 @@
         "Agent",
         "DeploymentGroup"
     ],
-    "revision": 1,
+    "revision": 2,
     "createdBy": {
         "displayName": "Thomas Bleijendaal",
         "id": "6dfd1ac2-dbeb-69b0-a0ff-d3bb8cfbb206",
@@ -41,7 +41,8 @@
         "id": "6dfd1ac2-dbeb-69b0-a0ff-d3bb8cfbb206",
         "uniqueName": "t.bleijendaal@wearetriple.com"
     },
-    "modifiedOn": "2018-06-08T11:50:16.897Z",
+    "modifiedOn": "2018-06-08T14:17:55.020Z",
+    "comment": "",
     "id": "3b990fe6-1e1c-434c-ac39-fcc36a0e3613",
     "name": "Azure Function Proxy Remove",
     "version": {
